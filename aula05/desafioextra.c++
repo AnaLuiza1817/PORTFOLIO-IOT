@@ -1,49 +1,61 @@
-const int botao = 2;
-const int rele1 = 12;
-const int rele2 = 8;
+// C++
+
+const int LED1 = 11;
+const int LED2 = 4;
+const int BOTAO = 3;
 
 int estado = 0;
 int ultimoEstadoBotao = HIGH;
 int botaoAtual;
+unsigned long ultimoTempoDebounce = 0;
+const unsigned long delayDebounce = 50;
 
 void setup() {
-  pinMode(botao, INPUT_PULLUP);
-  pinMode(rele1, OUTPUT);
-  pinMode(rele2, OUTPUT);
-
-  digitalWrite(rele1, LOW);
-  digitalWrite(rele2, LOW);
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(BOTAO, INPUT_PULLUP);
+  digitalWrite(LED1, LOW);
+  digitalWrite(LED2, LOW);
 }
 
 void loop() {
-  botaoAtual = digitalRead(botao);
-
-  if (ultimoEstadoBotao == HIGH && botaoAtual == LOW) {
-    estado++;
-
-    if (estado > 2) {
-      estado = 0;
-    }
-
-    switch (estado) {
-      case 0:
-        digitalWrite(rele1, LOW);
-        digitalWrite(rele2, LOW);
-        break;
-
-      case 1:
-        digitalWrite(rele1, HIGH);
-        digitalWrite(rele2, LOW);
-        break;
-
-      case 2:
-        digitalWrite(rele1, HIGH);
-        digitalWrite(rele2, HIGH);
-        break;
-    }
-
-    delay(200);
+  int leitura = digitalRead(BOTAO);
+  
+  if (leitura != ultimoEstadoBotao) {
+    ultimoTempoDebounce = millis();
   }
-
-  ultimoEstadoBotao = botaoAtual;
+  
+  if ((millis() - ultimoTempoDebounce) > delayDebounce) {
+    if (leitura != botaoAtual) {
+      botaoAtual = leitura;
+      
+      if (botaoAtual == LOW) {
+        estado++;
+        if (estado > 3) {
+          estado = 0;
+        }
+        
+        switch(estado) {
+          case 0:
+            digitalWrite(LED1, HIGH);
+            digitalWrite(LED2, LOW);
+            break;
+          case 1:
+            digitalWrite(LED1, LOW);
+            digitalWrite(LED2, HIGH);
+            break;
+          case 2:
+            digitalWrite(LED1, LOW);
+            digitalWrite(LED2, LOW);
+            break;
+          case 3:
+            digitalWrite(LED1, HIGH);
+            digitalWrite(LED2, LOW);
+            break;
+        }
+      }
+    }
+  }
+  
+  ultimoEstadoBotao = leitura;
 }
